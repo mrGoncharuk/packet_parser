@@ -1,3 +1,0 @@
-/home/mhonchar/Documents/packet_parser/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/mhonchar/Documents/packet_parser/cmake-build-debug/CMakeFiles/PacketParser.dir
-/home/mhonchar/Documents/packet_parser/cmake-build-debug/CMakeFiles/edit_cache.dir
