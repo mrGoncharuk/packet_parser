@@ -1,7 +1,25 @@
 #include <iostream>
+#include <fstream>
 
-int main()
+#include "../includes/PacketParser.hpp"
+
+int		main(int argc, char **argv)
 {
-	std::cout << "Hello, World!" << std::endl;
+	if (argc != 2)
+	{
+		std::cout << "Usage: ./packparsley [filename]\n";
+		return 0;
+	}
+
+	std::ifstream ifs(argv[1]);
+	if (!ifs.is_open())
+	{
+		std::cout << "Can't reach '" << argv[1] << "'. Ensure that file exists.\n";
+		return (0);
+	}
+
+	PacketParser parser;
+	parser.beginProcessing(ifs);
+
 	return 0;
 }

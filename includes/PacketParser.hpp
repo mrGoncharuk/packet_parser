@@ -3,20 +3,26 @@
 //
 
 #ifndef PACKETPARSER_PACKETPARSER_HPP
-#define PACKETPARSER_PACKETPARSER_HPP
+# define PACKETPARSER_PACKETPARSER_HPP
 
-#include <iostream>
+# include <iostream>
+# include <map>
+# include <regex>
+
+enum class valueType {Int, Float, String};
+
 
 class PacketParser
 {
 private:
-	std::istream	m_dataStream;
+	std::map< std::string, std::pair< valueType, std::string > >	data;
+
 public:
 	PacketParser();
 	~PacketParser();
-	void	bindStream(std::istream &is);
-	void	beginProcessing();
 
+	void	beginProcessing(std::istream &is);
+	void 	extractData();
 private:
 	void	readPacket();
 	void	splitPacket();
