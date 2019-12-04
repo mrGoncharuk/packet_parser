@@ -13,6 +13,17 @@
 
 enum class valueType {Null, Int, Float, String};
 
+
+class UndefinedEndOfStringException : public std::exception
+{
+public:
+	explicit UndefinedEndOfStringException(const std::string &segment);
+	virtual	const char *what() const throw();
+	virtual ~UndefinedEndOfStringException();
+private:
+	std::string msg;
+};
+
 class BadExspressionException : public std::exception
 {
 public:

@@ -4,6 +4,10 @@
 
 #include "../includes/Exceptions.hpp"
 
+UndefinedEndOfStringException::UndefinedEndOfStringException(const std::string &segment){
+	msg = "Closing quote not found in packet. '" + segment + "'.";
+}
+
 BadExspressionException::BadExspressionException(const std::string &segment){
 	msg = "Unrecognized expression was found [" + segment + "].";
 }
@@ -32,9 +36,10 @@ BadTypeException::BadTypeException(const valueType var_type, const valueType val
 
 UnsupportedOperationException::UnsupportedOperationException(const std::string &m)
 	: runtime_error("Unsupported operation.")
-	, msg(m)
-	{ }
+	, msg(m) { }
 
+
+const char *UndefinedEndOfStringException::what() const throw() { return msg.c_str(); }
 const char *BadExspressionException::what() const throw() { return msg.c_str(); }
 const char *ReDefinitionException::what() const throw() { return msg.c_str(); }
 const char *UnrecognizedElementException::what() const throw() { return msg.c_str(); }
@@ -43,6 +48,7 @@ const char *BadTypeException::what() const throw() { return msg.c_str(); }
 const char *UnsupportedOperationException::what() const throw() { return msg.c_str(); }
 
 
+UndefinedEndOfStringException::~UndefinedEndOfStringException() { }
 BadExspressionException::~BadExspressionException() { }
 ReDefinitionException::~ReDefinitionException() { }
 UnrecognizedElementException::~UnrecognizedElementException() { }

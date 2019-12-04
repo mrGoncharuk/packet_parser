@@ -7,7 +7,6 @@
 
 # include <iostream>
 # include <map>
-# include <regex>
 # include <sstream>
 # include "Exceptions.hpp"
 
@@ -21,9 +20,10 @@ public:
 	void	beginProcessing(std::istream &is);
 	void	showData();
 private:
-	void		processSegment(std::string seg);
-	void		saveField(std::string &seg);
-	void		updateField(std::string &seg);
+	std::string	packetSplit(const std::string &packet, size_t &pos);
+	void		processSegment(const std::string &seg);
+	void		saveField(const std::string &seg);
+	void		updateField(const std::string &seg);
 	std::string	extractValue(const std::string &seg, const char op);
 	valueType	recognizeType(const std::string &value);
 	char		recognizeOperator(const std::string &seg);

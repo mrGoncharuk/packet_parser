@@ -15,26 +15,49 @@ void	PacketParser::showData()
 		std::cout << it->second.first << '(' << it->first << "): " << it->second.second.second << std::endl;
 }
 
+std::string	PacketParser::packetSplit(const std::string &packet, size_t &pos)
+{
+	bool	isQuoteExist = false;
+	size_t	len = 0;
+	size_t	begin = pos;
+
+	while ((packet[pos] != ' ' || isQuoteExist) && packet[pos] != '\0')
+	{
+		if (packet[pos] == '"')
+			isQuoteExist = !isQuoteExist;
+		pos++;
+	}
+	len = pos - begin;
+	if (packet[pos] == '\0')
+	{
+		if (isQuoteExist)
+			throw UndefinedEndOfStringException(packet.substr(begin, len));
+		else
+			pos = std::string::npos;
+	}
+	else
+		pos++;
+	return packet.substr(begin, len);
+}
+
+
 void	PacketParser::beginProcessing(std::istream &is)
 {
 	std::string packet;
-	std::regex packet_split("((([\\S]|[\\S][\\S])(?=([^\\\"]*\\\"[^\\\"]*\\\"))\\\"[^\\\"]*\\\"|'[^']*'|[\\S]+)+)");
-	std::smatch matches;
+	size_t		pos = 0;
 
 	while (std::getline(is, packet))
 	{
-		std::sregex_iterator  currMatch(packet.begin(), packet.end(), packet_split);	// splitting packet by spaces
-		std::sregex_iterator lastMatch;
-		while (currMatch != lastMatch)
+		while (pos != std::string::npos)
 		{
-			std::smatch match = *currMatch;
-			processSegment(match.str());
-			currMatch++;
+			std::string segment = packetSplit(packet, pos);
+			processSegment(segment);
 		}
+		pos = 0;
 	}
 }
 
-void	PacketParser::processSegment(std::string seg)
+void	PacketParser::processSegment(const std::string &seg)
 {
 	if (seg.find(':') != std::string::npos)
 		saveField(seg);
@@ -42,7 +65,7 @@ void	PacketParser::processSegment(std::string seg)
 		updateField(seg);
 }
 
-void	PacketParser::saveField(std::string &seg)
+void	PacketParser::saveField(const std::string &seg)
 {
 	if (seg.length() < 3 || !(seg[0] >='A' && seg[0] <= 'Z') || seg[1] != ':')
 		throw BadExspressionException(seg);
@@ -59,7 +82,7 @@ void	PacketParser::saveField(std::string &seg)
 	data[seg[0]].second.first = valueType::Null;
 }
 
-void	PacketParser::updateField(std::string &seg)
+void	PacketParser::updateField(const std::string &seg)
 {
 	if (data.find(seg[0]) == data.end())
 		throw UnrecognizedElementException(seg);
