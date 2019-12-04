@@ -44,7 +44,7 @@ void	PacketParser::processSegment(std::string seg)
 
 void	PacketParser::saveField(std::string &seg)
 {
-	if (seg.length() < 3 || !(seg[0] >='A' && seg[0] <= 'Z'))
+	if (seg.length() < 3 || !(seg[0] >='A' && seg[0] <= 'Z') || seg[1] != ':')
 		throw BadExspressionException(seg);
 	if (data.find(seg[0]) != data.end())
 		throw ReDefinitionException(data[seg[0]].first, seg);
