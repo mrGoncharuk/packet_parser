@@ -1,4 +1,4 @@
-NAME = daemon-foldermonitor
+NAME = packparsley
 
 SRC_DIR = src/
 OBJ_DIR = obj/

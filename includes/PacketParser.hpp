@@ -8,14 +8,14 @@
 # include <iostream>
 # include <map>
 # include <regex>
-
-enum class valueType {Int, Float, String};
+# include <sstream>
+enum class valueType {Null, Int, Float, String};
 
 
 class PacketParser
 {
 private:
-	std::map< std::string, std::pair< valueType, std::string > >	data;
+	std::map< char, std::pair< std::string, std::pair< valueType, std::string > > >	data;
 
 public:
 	PacketParser();
@@ -24,13 +24,14 @@ public:
 	void	beginProcessing(std::istream &is);
 	void 	extractData();
 private:
+	void	processSegment(std::string seg);
 	void	readPacket();
 	void	splitPacket();
 	void	validateSegment();
-	void	saveField();
+	void	saveField(std::string &seg);
 	void	findField();
 	void	checkSegmentDataType();
-	void	updateField();
+	void	updateField(std::string &seg);
 };
 
 
