@@ -3,16 +3,21 @@
 //
 
 #include "../includes/PacketParser.hpp"
-
+#include <iomanip>
 PacketParser::PacketParser()
-{}
+{
+
+}
 PacketParser::~PacketParser()
 {}
 
 void	PacketParser::showData()
 {
-	for (auto it = data.begin(); it != data.end(); it++)
-		std::cout << it->second.first << '(' << it->first << "): " << it->second.second.second << std::endl;
+	for (char i = 'A'; i <= 'Z'; i++)
+	{
+		if (data[i].get_type() != IVT_NULL)
+			std::cout << data[i]["name"] << '(' << i << "): " << data[i]["value"] << std::endl;
+	}
 }
 
 std::string	PacketParser::packetSplit(const std::string &packet, size_t &pos)
@@ -67,10 +72,12 @@ void	PacketParser::processSegment(const std::string &seg)
 
 void	PacketParser::saveField(const std::string &seg)
 {
+	if (data[seg[0]].get_type() == IVT_NULL)
+		data[seg[0]] = new AList;
 	if (seg.length() < 3 || !(seg[0] >='A' && seg[0] <= 'Z') || seg[1] != ':')
 		throw BadExspressionException(seg);
-	if (data.find(seg[0]) != data.end())
-		throw ReDefinitionException(data[seg[0]].first, seg);
+	if (data[seg[0]]["name"].get_value().sValue != NULL)
+		throw ReDefinitionException(std::string(data[seg[0]]["name"].get_value().sValue), seg);		//changed
 
 	size_t quote_start = seg.find('"');
 	std::string field_name;
@@ -78,37 +85,36 @@ void	PacketParser::saveField(const std::string &seg)
 		field_name = seg.substr(quote_start, seg.length() - 1);
 	else
 		field_name = seg.substr(2, seg.length());
-	data[seg[0]].first = field_name;
-	data[seg[0]].second.first = valueType::Null;
+	data[seg[0]]["name"] = field_name.c_str();		//changed
 }
 
 void	PacketParser::updateField(const std::string &seg)
 {
-	if (data.find(seg[0]) == data.end())
+	if (data[seg[0]]["name"].get_value().sValue == NULL)
 		throw UnrecognizedElementException(seg);
 
 	char op = recognizeOperator(seg);
 	std::string value = extractValue(seg, op);
-	valueType val_type = recognizeType(value);
-	if (data[seg[0]].second.first == valueType::Null)
+	__ItemValueType val_type = recognizeType(value);
+	if (data[seg[0]]["value"].get_type() == IVT_NULL)
 	{
 		if ((op != '\0' && op != '='))
 			throw ModifyingBeforeInitializationException(seg);
-		data[seg[0]].second.first = val_type;
-		data[seg[0]].second.second = removeQuotes(value);
+		if (val_type == IVT_INT)
+			data[seg[0]]["value"] = std::stoi(value);
+		else if (val_type == IVT_FLOAT)
+			data[seg[0]]["value"] = std::stof(value);
+		else
+			data[seg[0]]["value"] = removeQuotes(value).c_str();
 		return;
 	}
-	if (data[seg[0]].second.first != val_type)
-		throw BadTypeException(data[seg[0]].second.first, val_type);
+	if (data[seg[0]]["value"].get_type() != val_type)
+		throw BadTypeException(data[seg[0]]["value"].get_type(), val_type);
 
 	if (op == '\0' || op == '=')
-	{
-		data[seg[0]].second.second = removeQuotes(value);
-	}
+		assignValue(value, seg[0]);
 	else if (op == '+')
-	{
 		addValues(value, seg[0]);
-	}
 	else
 		subValues(value, seg[0]);
 }
@@ -124,52 +130,52 @@ std::string	PacketParser::extractValue(const std::string &seg, const char op)
 	return seg.substr(beg, seg.length());
 }
 
-valueType	PacketParser::recognizeType(const std::string &value)
+__ItemValueType	PacketParser::recognizeType(const std::string &value)
 {
 	int i = 0;
 	int j = value.length() - 1;
 	bool flagFloat = false;
 
 	if (i == j && !(value[i] >= '0' && value[i] <= '9'))
-		return valueType::String;
+		return IVT_STRING;
 
 	if (value[i] != '.' && value[i] != '+'
 		&& value[i] != '-' && !(value[i] >= '0' && value[i] <= '9'))
-		return valueType::String;
+		return IVT_STRING;
 
 	while (i <= j)
 	{
 		if (value[i] != 'e' && value[i] != '.'
 			&& value[i] != '+' && value[i] != '-'
 			&& !(value[i] >= '0' && value[i] <= '9'))
-			return valueType::String;
+			return IVT_STRING;
 
 		if (value[i] == '.')
 		{
 			if (flagFloat)
-				return valueType::String;
+				return IVT_STRING;
 			if (i + 1 > static_cast<int>(value.length()))
-				return valueType::String;
+				return IVT_STRING;
 			if (!(value[i + 1] >= '0' && value[i + 1] <= '9'))
-				return valueType::String;
+				return IVT_STRING;
 			flagFloat = true;
 		}
 		else if (value[i] == 'e')
 		{
 			flagFloat = true;
 			if (!(value[i - 1] >= '0' && value[i - 1] <= '9'))
-				return valueType::String;
+				return IVT_STRING;
 			if (i + 1 > static_cast<int>(value.length()))
-				return valueType::String;
+				return IVT_STRING;
 			if (value[i + 1] != '+' && value[i + 1] != '-'
 				&& (value[i + 1] >= '0' && value[i] <= '9'))
-				return valueType::String;
+				return IVT_STRING;
 		}
 		i++;
 	}
 	if (flagFloat)
-		return valueType::Float;
-	return valueType::Int;
+		return IVT_FLOAT;
+	return IVT_INT;
 }
 
 char	PacketParser::recognizeOperator(const std::string &seg)
@@ -180,39 +186,49 @@ char	PacketParser::recognizeOperator(const std::string &seg)
 		return '\0';
 }
 
+void	PacketParser::assignValue(const std::string &value, const char key)
+{
+	if (data[key]["value"].get_type() == IVT_INT)
+		data[key]["value"] = std::stoi(value);
+	else if (data[key]["value"].get_type() == IVT_FLOAT)
+		data[key]["value"] = std::stof(value);
+	else
+		data[key]["value"] = value.c_str();
+}
+
 void	PacketParser::addValues(const std::string &value, const char key)
 {
-	if (data[key].second.first == valueType::Int)
+	if (data[key]["value"].get_type() == IVT_INT)
 	{
-		int result = std::stoi(data[key].second.second) + std::stoi(value);
-		data[key].second.second = std::to_string(result);
+		int result = data[key]["value"].get_value().iValue + std::stoi(value);
+		data[key]["value"] = result;
 	}
-	else if (data[key].second.first == valueType::Float)
+	else if (data[key]["value"].get_type() == IVT_FLOAT)
 	{
-		float result = std::stof(data[key].second.second) + std::stof(value);
-		data[key].second.second = std::to_string(result);
+		float result = data[key]["value"].get_value().fValue + std::stof(value);
+		data[key]["value"] = result;
 	}
 	else
 	{
-		data[key].second.second += removeQuotes(value);
+		data[key]["value"] = (removeQuotes(value) + data[key]["value"].get_value().sValue).c_str();
 	}
 }
 
 void	PacketParser::subValues(const std::string &value, const char key)
 {
-	if (data[key].second.first == valueType::Int)
+	if (data[key]["value"].get_type() == IVT_INT)
 	{
-		int result = std::stoi(data[key].second.second) - std::stoi(value);
-		data[key].second.second = std::to_string(result);
+		int result = data[key]["value"].get_value().iValue - std::stoi(value);
+		data[key]["value"] = result;
 	}
-	else if (data[key].second.first == valueType::Float)
+	else if (data[key]["value"].get_type() == IVT_FLOAT)
 	{
-		float result = std::stof(data[key].second.second) - std::stof(value);
-		data[key].second.second = std::to_string(result);
+		float result = data[key]["value"].get_value().fValue - std::stof(value);
+		data[key]["value"] = result;
 	}
 	else
 	{
-		throw UnsupportedOperationException("Subtraction of strings is unsupported");
+		throw UnsupportedOperationException("Subtraction of strings is unsupported!");
 	}
 }
 

@@ -11,7 +11,7 @@
 //# include <iostream>
 # include <stdexcept>
 
-enum class valueType {Null, Int, Float, String};
+# include "AList.hpp"
 
 
 class UndefinedEndOfStringException : public std::exception
@@ -67,7 +67,7 @@ private:
 class BadTypeException : public std::runtime_error
 {
 public:
-	explicit BadTypeException(const valueType var_type, const valueType val_type);
+	explicit BadTypeException(const __ItemValueType var_type, const __ItemValueType val_type);
 	virtual	const char *what() const throw();
 	virtual ~BadTypeException();
 private:

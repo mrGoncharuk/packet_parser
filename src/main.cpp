@@ -24,6 +24,10 @@ int		main(int argc, char **argv)
 		parser.beginProcessing(ifs);
 		parser.showData();
 	}
+	catch (UndefinedEndOfStringException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 	catch (BadExspressionException &e)
 	{
 		std::cout << e.what() << std::endl;

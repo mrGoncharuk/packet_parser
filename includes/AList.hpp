@@ -21,14 +21,14 @@ typedef enum __ItemValueType
 
 } _ItemValueType;
 
-class _Generic
+class _Gen
 {
     public:
-        _Generic()
+        _Gen()
         {
         }
 
-        virtual ~_Generic()
+        virtual ~_Gen()
         {
         }
 
@@ -49,13 +49,13 @@ typedef struct __ItemValueInfo
         float fValue;
         double eValue;
         char* sValue;
-        _Generic* aValue;
+        _Gen* aValue;
         void* oValue;
     };
 
 } _ItemValueInfo, *_lpItemValueInfo;
 
-class ItemInfo : public _Generic
+class ItemInfo : public _Gen
 {
     public:
         ItemInfo()
@@ -249,7 +249,7 @@ class ItemInfo : public _Generic
             return (*this);
         }
 
-        inline ItemInfo& operator = (_Generic* ref)
+        inline ItemInfo& operator = (_Gen* ref)
         {
             Destroy();
 
@@ -381,7 +381,7 @@ class ItemInfo : public _Generic
 
 };
 
-class AList : public _Generic
+class AList : public _Gen
 {
     public:
         AList()
@@ -436,8 +436,8 @@ class AList : public _Generic
 
         friend inline ostream& operator << (ostream &stream, AList& ref)
         {
+			(void)ref;
             stream << "[List]";
-
             return stream;
         }
 
@@ -512,14 +512,6 @@ protected:
 
 };
 
-ItemInfo& ItemInfo::operator[] (const int index)
-{
-    return (((AList&)(*m_value.aValue))[index]);
-}
 
-ItemInfo& ItemInfo::operator[] (const char* name)
-{
-    return (((AList&)(*m_value.aValue))[name]);
-}
 
 #endif // ALIST_H_INCLUDED

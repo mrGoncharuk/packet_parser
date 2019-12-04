@@ -26,7 +26,7 @@ ModifyingBeforeInitializationException::ModifyingBeforeInitializationException(c
 	msg = "Modifying element before it initialization [" + segment +"].";
 }
 
-BadTypeException::BadTypeException(const valueType var_type, const valueType val_type)
+BadTypeException::BadTypeException(const __ItemValueType var_type, const __ItemValueType val_type)
 	:runtime_error("Type error.")
 {
 

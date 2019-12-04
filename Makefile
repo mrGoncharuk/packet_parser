@@ -9,10 +9,12 @@ LIB =
 
 SRC_FILES =		main.cpp \
 				PacketParser.cpp \
-				Exceptions.cpp
+				Exceptions.cpp \
+				AList.cpp
 
 HEADERS = 		$(INC_DIR)PacketParser.hpp \
-				$(INC_DIR)Exceptions.hpp
+				$(INC_DIR)Exceptions.hpp \
+				$(INC_DIR)AList.hpp
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(addprefix $(OBJ_DIR), $(SRC_FILES:.cpp=.o))
