@@ -1,6 +1,5 @@
 N:Name A:Age G:Gender H:Home L:Location S:Score X:xpos Y:ypos
-N"John Smith" A21 G"Male" H"England" L"Jamestown, Virginia" X=-76.780527 Y37.2067108 S0 Qqw:"s ss"
-
+N"John Smith" A21 G"Male" H"England" L"Jamestown, Virginia" X=-76.780527 Y37.2067108 S0
 X+0.000001 Y+0.000001
 X+0.000001 Y+0.000001
 X+0.000002 Y+0.000001
