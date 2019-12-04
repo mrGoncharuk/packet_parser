@@ -44,7 +44,7 @@ void	PacketParser::processSegment(std::string seg)
 
 void	PacketParser::saveField(std::string &seg)
 {
-	if (seg.length() < 3)
+	if (seg.length() < 3 || !(seg[0] >='A' && seg[0] <= 'Z'))
 		throw BadExspressionException(seg);
 	if (data.find(seg[0]) != data.end())
 		throw ReDefinitionException(data[seg[0]].first, seg);
@@ -72,7 +72,7 @@ void	PacketParser::updateField(std::string &seg)
 		if ((op != '\0' && op != '='))
 			throw ModifyingBeforeInitializationException(seg);
 		data[seg[0]].second.first = val_type;
-		data[seg[0]].second.second = value;
+		data[seg[0]].second.second = removeQuotes(value);
 		return;
 	}
 	if (data[seg[0]].second.first != val_type)
@@ -80,7 +80,7 @@ void	PacketParser::updateField(std::string &seg)
 
 	if (op == '\0' || op == '=')
 	{
-		data[seg[0]].second.second = value;
+		data[seg[0]].second.second = removeQuotes(value);
 	}
 	else if (op == '+')
 	{
@@ -171,7 +171,7 @@ void	PacketParser::addValues(const std::string &value, const char key)
 	}
 	else
 	{
-		data[key].second.second += value;
+		data[key].second.second += removeQuotes(value);
 	}
 }
 
@@ -191,4 +191,12 @@ void	PacketParser::subValues(const std::string &value, const char key)
 	{
 		throw UnsupportedOperationException("Subtraction of strings is unsupported");
 	}
+}
+
+std::string		PacketParser::removeQuotes(const std::string &val)
+{
+		if (val[0] == '"' && val[val.length() - 1] == '"')
+			return val.substr(1, val.length() - 2);
+		else
+			return val;
 }

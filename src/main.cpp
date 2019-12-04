@@ -22,6 +22,7 @@ int		main(int argc, char **argv)
 	try
 	{
 		parser.beginProcessing(ifs);
+		parser.showData();
 	}
 	catch (BadExspressionException &e)
 	{
@@ -51,6 +52,6 @@ int		main(int argc, char **argv)
 	{
 		std::cout << e.what() << std::endl;
 	}
-	parser.showData();
+
 	return 0;
 }

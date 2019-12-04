@@ -29,6 +29,7 @@ private:
 	char		recognizeOperator(const std::string &seg);
 	void		addValues(const std::string &value, const char key);
 	void		subValues(const std::string &value, const char key);
+	std::string	removeQuotes(const std::string &val);
 
 private:
 	std::map< char, std::pair< std::string, std::pair< valueType, std::string > > >	data;
