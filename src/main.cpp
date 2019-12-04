@@ -7,7 +7,7 @@ int		main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
-		std::cout << "Usage: ./packparsley [filename]\n";
+		std::cout << "Usage: ./" <<argv[0] << " [filename]\n";
 		return 0;
 	}
 
@@ -20,6 +20,6 @@ int		main(int argc, char **argv)
 
 	PacketParser parser;
 	parser.beginProcessing(ifs);
-
+	parser.showData();
 	return 0;
 }
