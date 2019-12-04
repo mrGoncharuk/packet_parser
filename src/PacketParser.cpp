@@ -4,9 +4,6 @@
 
 #include "../includes/PacketParser.hpp"
 
-
-
-
 PacketParser::PacketParser()
 {}
 PacketParser::~PacketParser()
@@ -34,28 +31,23 @@ void	PacketParser::beginProcessing(std::istream &is)
 			processSegment(match.str());
 			currMatch++;
 		}
-
 	}
 }
 
 void	PacketParser::processSegment(std::string seg)
 {
 	if (seg.find(':') != std::string::npos)
-	{
 		saveField(seg);
-	}
 	else
-	{
 		updateField(seg);
-	}
 }
 
 void	PacketParser::saveField(std::string &seg)
 {
 	if (seg.length() < 3)
-		throw "BadField";
+		throw BadExspressionException(seg);
 	if (data.find(seg[0]) != data.end())
-		throw "Redefinition of element";
+		throw ReDefinitionException(data[seg[0]].first, seg);
 
 	size_t quote_start = seg.find('"');
 	std::string field_name;
@@ -70,7 +62,7 @@ void	PacketParser::saveField(std::string &seg)
 void	PacketParser::updateField(std::string &seg)
 {
 	if (data.find(seg[0]) == data.end())
-		throw "Modyfing undeclared element.";
+		throw UnrecognizedElementException(seg);
 
 	char op = recognizeOperator(seg);
 	std::string value = extractValue(seg, op);
@@ -78,13 +70,13 @@ void	PacketParser::updateField(std::string &seg)
 	if (data[seg[0]].second.first == valueType::Null)
 	{
 		if ((op != '\0' && op != '='))
-			throw "Modifying unitilalized value.";
+			throw ModifyingBeforeInitializationException(seg);
 		data[seg[0]].second.first = val_type;
 		data[seg[0]].second.second = value;
 		return;
 	}
 	if (data[seg[0]].second.first != val_type)
-		throw "Type error.";
+		throw BadTypeException(data[seg[0]].second.first, val_type);
 
 	if (op == '\0' || op == '=')
 	{
@@ -96,6 +88,73 @@ void	PacketParser::updateField(std::string &seg)
 	}
 	else
 		subValues(value, seg[0]);
+}
+
+std::string	PacketParser::extractValue(const std::string &seg, const char op)
+{
+	std::string value;
+	size_t beg;
+	if (op == '\0')
+		beg = 1;
+	else
+		beg = 2;
+	return seg.substr(beg, seg.length());
+}
+
+valueType	PacketParser::recognizeType(const std::string &value)
+{
+	int i = 0;
+	int j = value.length() - 1;
+	bool flagFloat = false;
+
+	if (i == j && !(value[i] >= '0' && value[i] <= '9'))
+		return valueType::String;
+
+	if (value[i] != '.' && value[i] != '+'
+		&& value[i] != '-' && !(value[i] >= '0' && value[i] <= '9'))
+		return valueType::String;
+
+	while (i <= j)
+	{
+		if (value[i] != 'e' && value[i] != '.'
+			&& value[i] != '+' && value[i] != '-'
+			&& !(value[i] >= '0' && value[i] <= '9'))
+			return valueType::String;
+
+		if (value[i] == '.')
+		{
+			if (flagFloat)
+				return valueType::String;
+			if (i + 1 > static_cast<int>(value.length()))
+				return valueType::String;
+			if (!(value[i + 1] >= '0' && value[i + 1] <= '9'))
+				return valueType::String;
+			flagFloat = true;
+		}
+		else if (value[i] == 'e')
+		{
+			flagFloat = true;
+			if (!(value[i - 1] >= '0' && value[i - 1] <= '9'))
+				return valueType::String;
+			if (i + 1 > static_cast<int>(value.length()))
+				return valueType::String;
+			if (value[i + 1] != '+' && value[i + 1] != '-'
+				&& (value[i + 1] >= '0' && value[i] <= '9'))
+				return valueType::String;
+		}
+		i++;
+	}
+	if (flagFloat)
+		return valueType::Float;
+	return valueType::Int;
+}
+
+char	PacketParser::recognizeOperator(const std::string &seg)
+{
+	if ((seg[1] == '+') || (seg[1] == '-') || (seg[1] == '='))
+		return seg[1];
+	else
+		return '\0';
 }
 
 void	PacketParser::addValues(const std::string &value, const char key)
@@ -130,73 +189,6 @@ void	PacketParser::subValues(const std::string &value, const char key)
 	}
 	else
 	{
-		throw "Unsuported operation of substraction on string!";
+		throw UnsupportedOperationException("Subtraction of strings is unsupported");
 	}
-}
-
-char	PacketParser::recognizeOperator(const std::string &seg)
-{
-	if ((seg[1] == '+') || (seg[1] == '-') || (seg[1] == '='))
-		return seg[1];
-	else
-		return '\0';
-}
-
-std::string	PacketParser::extractValue(const std::string &seg, const char op)
-{
-	std::string value;
-	size_t beg;
-	if (op == '\0')
-		beg = 1;
-	else
-		beg = 2;
-	return seg.substr(beg, seg.length());
-}
-
-
-valueType	PacketParser::recognizeType(const std::string &value)
-{
-	int i = 0;
-	int j = value.length() - 1;
-	bool flagFloat = false;
-
-	if (i == j && !(value[i] >= '0' && value[i] <= '9'))
-		return valueType::String;
-
-	if (value[i] != '.' && value[i] != '+'
-		&& value[i] != '-' && !(value[i] >= '0' && value[i] <= '9'))
-		return valueType::String;
-
-	for (i; i <= j; i++)
-	{
-		if (value[i] != 'e' && value[i] != '.'
-			&& value[i] != '+' && value[i] != '-'
-			&& !(value[i] >= '0' && value[i] <= '9'))
-			return valueType::String;
-
-		if (value[i] == '.')
-		{
-			if (flagFloat == true)
-				return valueType::String;
-			if (i + 1 > value.length())
-				return valueType::String;
-			if (!(value[i + 1] >= '0' && value[i + 1] <= '9'))
-				return valueType::String;
-			flagFloat = true;
-		}
-		else if (value[i] == 'e')
-		{
-			flagFloat = true;
-			if (!(value[i - 1] >= '0' && value[i - 1] <= '9'))
-				return valueType::String;
-			if (i + 1 > value.length())
-				return valueType::String;
-			if (value[i + 1] != '+' && value[i + 1] != '-'
-				&& (value[i + 1] >= '0' && value[i] <= '9'))
-				return valueType::String;
-		}
-	}
-	if (flagFloat)
-		return valueType::Float;
-	return valueType::Int;
 }

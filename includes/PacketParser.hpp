@@ -9,8 +9,9 @@
 # include <map>
 # include <regex>
 # include <sstream>
+# include "Exceptions.hpp"
 
-enum class valueType {Null, Int, Float, String};
+
 
 class PacketParser
 {
@@ -22,12 +23,12 @@ public:
 private:
 	void		processSegment(std::string seg);
 	void		saveField(std::string &seg);
-	valueType	recognizeType(const std::string &value);
-	void		addValues(const std::string &value, const char key);
-	void		subValues(const std::string &value, const char key);
 	void		updateField(std::string &seg);
 	std::string	extractValue(const std::string &seg, const char op);
+	valueType	recognizeType(const std::string &value);
 	char		recognizeOperator(const std::string &seg);
+	void		addValues(const std::string &value, const char key);
+	void		subValues(const std::string &value, const char key);
 
 private:
 	std::map< char, std::pair< std::string, std::pair< valueType, std::string > > >	data;

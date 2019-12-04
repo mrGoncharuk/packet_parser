@@ -7,7 +7,7 @@ int		main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
-		std::cout << "Usage: ./" <<argv[0] << " [filename]\n";
+		std::cout << "Usage: " <<argv[0] << " [filename]\n";
 		return 0;
 	}
 
@@ -19,7 +19,38 @@ int		main(int argc, char **argv)
 	}
 
 	PacketParser parser;
-	parser.beginProcessing(ifs);
+	try
+	{
+		parser.beginProcessing(ifs);
+	}
+	catch (BadExspressionException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (ReDefinitionException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (UnrecognizedElementException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (ModifyingBeforeInitializationException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (BadTypeException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (UnsupportedOperationException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (std::exception &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 	parser.showData();
 	return 0;
 }
