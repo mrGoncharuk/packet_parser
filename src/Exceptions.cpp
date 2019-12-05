@@ -5,7 +5,7 @@
 #include "../includes/Exceptions.hpp"
 
 UndefinedEndOfStringException::UndefinedEndOfStringException(const std::string &segment){
-	msg = "Closing quote not found in packet. '" + segment + "'.";
+	msg = "Closing quote not found in packet. Value processed: '" + segment + "'.";
 }
 
 BadExspressionException::BadExspressionException(const std::string &segment){

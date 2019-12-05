@@ -12,6 +12,9 @@
 # include "AList.hpp"
 
 
+enum class OperatioType {Null, Save, Assign, Add, Sub};
+
+
 class PacketParser
 {
 
@@ -23,19 +26,17 @@ public:
 
 private:
 	std::string	packetSplit(const std::string &packet, size_t &pos);
-	void		processSegment(const std::string &seg);
-	void		saveField(const std::string &seg);
-	void		updateField(const std::string &seg);
-	std::string	extractValue(const std::string &seg, const char op);
-	__ItemValueType	recognizeType(const std::string &value);
-	char		recognizeOperator(const std::string &seg);
-	void		assignValue(const std::string &value, const char key);
-	void		addValues(const std::string &value, const char key);
-	void		subValues(const std::string &value, const char key);
-	std::string	removeQuotes(const std::string &val);
+	void		processSegment(const int key, const std::string &value, const __ItemValueType value_tyep, const OperatioType opt);
+	void		saveField(const int key, const std::string &value);
+	void		updateField(const int key, const std::string &value, const __ItemValueType value_type, const OperatioType opt);
+
+	void		assignValue(const int key, const std::string &value, const __ItemValueType value_type);
+	void		addValues(const int key, const std::string &value, const __ItemValueType value_type);
+	void		subValues(const int key, const std::string &value, const __ItemValueType value_type);
 
 private:
 	AList data;
+	static const size_t reservedLen;
 };
 
 
