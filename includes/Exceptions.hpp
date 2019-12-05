@@ -14,6 +14,17 @@
 # include "AList.hpp"
 
 
+class KeyValueNotFoundException : public std::exception
+{
+public:
+	explicit KeyValueNotFoundException();
+	virtual	const char *what() const throw();
+	virtual ~KeyValueNotFoundException();
+private:
+	std::string msg;
+};
+
+
 class UndefinedEndOfStringException : public std::exception
 {
 public:

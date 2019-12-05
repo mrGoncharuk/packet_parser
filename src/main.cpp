@@ -24,7 +24,11 @@ int		main(int argc, char **argv)
 		parser.beginProcessing(ifs);
 		parser.showData();
 	}
-	catch (UndefinedEndOfStringException &e)
+	catch (KeyValueNotFoundException &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (UnsupportedKeyValueException &e)
 	{
 		std::cout << e.what() << std::endl;
 	}

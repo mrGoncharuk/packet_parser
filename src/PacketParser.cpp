@@ -66,6 +66,8 @@ void	PacketParser::beginProcessing(std::istream &is)
 			}
 			case ':':
 			{
+				if (key == -1)
+					throw KeyValueNotFoundException();
 				opt = OperatioType::Save;
 				break;
 			}

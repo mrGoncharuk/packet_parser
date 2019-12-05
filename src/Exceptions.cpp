@@ -30,6 +30,10 @@ static std::string typeToStr(const __ItemValueType val_type)
 
 }
 
+KeyValueNotFoundException::KeyValueNotFoundException()
+	: msg("Key value during declaration not found.")
+{}
+
 UnsupportedKeyValueException::UnsupportedKeyValueException(const char key){
 	msg = "Unsupported key value: " + std::to_string(key);
 }
@@ -67,9 +71,10 @@ UnsupportedOperationException::UnsupportedOperationException(const std::string &
 	msg = m + " Value key: " + key + " Value type: " + typeToStr(type);
 }
 
-
+const char *KeyValueNotFoundException::what() const throw() { return msg.c_str(); }
 const char *UndefinedEndOfStringException::what() const throw() { return msg.c_str(); }
 const char *UnsupportedKeyValueException::what() const throw() { return msg.c_str(); }
+
 
 const char *BadExspressionException::what() const throw() { return msg.c_str(); }
 const char *ReDefinitionException::what() const throw() { return msg.c_str(); }
@@ -78,7 +83,7 @@ const char *ModifyingBeforeInitializationException::what() const throw() { retur
 const char *BadTypeException::what() const throw() { return msg.c_str(); }
 const char *UnsupportedOperationException::what() const throw() { return msg.c_str(); }
 
-
+KeyValueNotFoundException::~KeyValueNotFoundException() { }
 UndefinedEndOfStringException::~UndefinedEndOfStringException() { }
 UnsupportedKeyValueException::~UnsupportedKeyValueException() { }
 BadExspressionException::~BadExspressionException() { }
