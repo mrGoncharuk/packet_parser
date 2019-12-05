@@ -25,11 +25,9 @@ public:
 	void	showData();
 
 private:
-	std::string	packetSplit(const std::string &packet, size_t &pos);
 	void		processSegment(const int key, const std::string &value, const __ItemValueType value_tyep, const OperatioType opt);
 	void		saveField(const int key, const std::string &value);
 	void		updateField(const int key, const std::string &value, const __ItemValueType value_type, const OperatioType opt);
-
 	void		assignValue(const int key, const std::string &value, const __ItemValueType value_type);
 	void		addValues(const int key, const std::string &value, const __ItemValueType value_type);
 	void		subValues(const int key, const std::string &value, const __ItemValueType value_type);

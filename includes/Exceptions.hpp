@@ -24,6 +24,16 @@ private:
 	std::string msg;
 };
 
+class UnsupportedKeyValueException : public std::exception
+{
+public:
+	explicit UnsupportedKeyValueException(const char key);
+	virtual	const char *what() const throw();
+	virtual ~UnsupportedKeyValueException();
+private:
+	std::string msg;
+};
+
 class BadExspressionException : public std::exception
 {
 public:
@@ -47,7 +57,7 @@ private:
 class UnrecognizedElementException : public std::runtime_error
 {
 public:
-	explicit UnrecognizedElementException(const std::string &action);
+	explicit UnrecognizedElementException(const std::string &msg, const char key);
 	virtual	const char *what() const throw();
 	virtual ~UnrecognizedElementException();
 private:
@@ -57,7 +67,7 @@ private:
 class ModifyingBeforeInitializationException : public std::runtime_error
 {
 public:
-	explicit ModifyingBeforeInitializationException(const std::string &segment);
+	explicit ModifyingBeforeInitializationException(const std::string &value, const char key);
 	virtual	const char *what() const throw();
 	virtual ~ModifyingBeforeInitializationException();
 private:
@@ -67,7 +77,7 @@ private:
 class BadTypeException : public std::runtime_error
 {
 public:
-	explicit BadTypeException(const __ItemValueType var_type, const __ItemValueType val_type);
+	explicit BadTypeException(const char key, const __ItemValueType var_type, const __ItemValueType val_type);
 	virtual	const char *what() const throw();
 	virtual ~BadTypeException();
 private:
@@ -77,7 +87,7 @@ private:
 class UnsupportedOperationException : public std::runtime_error
 {
 public:
-	explicit UnsupportedOperationException(const std::string &msg);
+	explicit UnsupportedOperationException(const std::string &msg, const char key, __ItemValueType type);
 	virtual	const char *what() const throw();
 	virtual ~UnsupportedOperationException();
 private:

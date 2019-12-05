@@ -18,7 +18,6 @@ typedef enum __ItemValueType
     IVT_STRING = 5,
     IVT_LIST = 6,
     IVT_OBJECT = 7
-
 } _ItemValueType;
 
 class _Gen

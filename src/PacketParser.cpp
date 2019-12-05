@@ -5,7 +5,7 @@
 #include "../includes/PacketParser.hpp"
 #include <iomanip>
 
-const size_t PacketParser::reservedLen = 128;
+const size_t PacketParser::reservedLen = 1024;
 
 PacketParser::PacketParser()
 {
@@ -41,9 +41,7 @@ void	PacketParser::beginProcessing(std::istream &is)
 			case '+':
 			{
 				if (opt == OperatioType::Null)
-				{
 					opt = OperatioType::Add;
-				}
 				else if (value_type != IVT_STRING && !isSigned && value.length() == 0)
 				{
 					isSigned = true;
@@ -56,9 +54,7 @@ void	PacketParser::beginProcessing(std::istream &is)
 			case '-':
 			{
 				if (opt == OperatioType::Null)
-				{
 					opt = OperatioType::Sub;
-				}
 				else if (value_type != IVT_STRING && !isSigned && value.length() == 0)
 				{
 					isSigned = true;
@@ -95,26 +91,14 @@ void	PacketParser::beginProcessing(std::istream &is)
 				break;
 			}
 			case ' ':
-			{
-				if (isQuoteExist)
-				{
-					value.push_back(ch);
-					break;
-				}
-				processSegment(key, value, value_type, opt);
-				value_type = IVT_INT;
-				isSigned = false;
-				opt = OperatioType::Null;
-				isQuoteExist = false;
-				value.clear();
-				key = -1;
-				break;
-			}
 			case '\n':
 			{
 				if (isQuoteExist)
 				{
-					throw UndefinedEndOfStringException(value);
+					if (ch == '\n')
+						throw UndefinedEndOfStringException(value);
+					value.push_back(ch);
+					break;
 				}
 				processSegment(key, value, value_type, opt);
 				value_type = IVT_INT;
@@ -135,12 +119,10 @@ void	PacketParser::beginProcessing(std::istream &is)
 						break;
 					}
 					else
-						throw UnsupportedOperationException("Using of unexpected key value");
+						throw UnsupportedKeyValueException(static_cast<char>(ch));
 				}
 				if (opt == OperatioType::Null && key != -1)
-				{
 					opt = OperatioType::Assign;
-				}
 				if (!(ch >= '0' && ch <= '9'))
 					value_type = IVT_STRING;
 				value.push_back(ch);
@@ -153,13 +135,9 @@ void	PacketParser::beginProcessing(std::istream &is)
 void	PacketParser::processSegment(const int key, const std::string &value, const __ItemValueType value_type, const OperatioType opt)
 {
 	if (opt == OperatioType::Save)
-	{
 		saveField(key, value);
-	}
 	else
-	{
 		updateField(key, value, value_type, opt);
-	}
 }
 
 void	PacketParser::saveField(const int key, const std::string &value)
@@ -175,12 +153,12 @@ void	PacketParser::saveField(const int key, const std::string &value)
 void	PacketParser::updateField(const int key, const std::string &value, const __ItemValueType value_type, const OperatioType opt)
 {
 	if (data[key].get_value().aValue == NULL)
-		throw UnrecognizedElementException(value);
+		throw UnrecognizedElementException("Using undeclared key.", static_cast<char>(key));
 
 	if (data[key]["value"].get_type() == IVT_NULL)			// is value already initialized
 	{
 		if (opt != OperatioType::Assign)
-			throw ModifyingBeforeInitializationException(value);
+			throw ModifyingBeforeInitializationException(value, static_cast<char>(key));
 
 		if (value_type == IVT_INT)
 			data[key]["value"] = std::stoi(value);
@@ -189,12 +167,12 @@ void	PacketParser::updateField(const int key, const std::string &value, const __
 		else if (value_type == IVT_STRING)
 			data[key]["value"] = value.c_str();
 		else
-			throw UnrecognizedElementException(value);
+			throw UnrecognizedElementException("Unknown type of value.", static_cast<char>(key));
 	}
 	else
 	{
 		if (data[key]["value"].get_type() != value_type)
-			throw BadTypeException(data[key]["value"].get_type(), value_type);
+			throw BadTypeException(static_cast<char>(key), data[key]["value"].get_type(), value_type);
 		if (opt == OperatioType::Assign)
 			assignValue(key, value, value_type);
 		else if (opt == OperatioType::Add)
@@ -229,11 +207,9 @@ void	PacketParser::addValues(const int key, const std::string &value, const __It
 		data[key]["value"] = result;
 	}
 	else if (value_type == IVT_STRING)
-	{
-		data[key]["value"] = (value + data[key]["value"].get_value().sValue).c_str();
-	}
+		data[key]["value"] = (data[key]["value"].get_value().sValue + value).c_str();
 	else
-		throw UnsupportedOperationException("Unsupported operation on unknown type.");
+		throw UnsupportedOperationException("Unsupported addition on unknown type.", key, value_type);
 }
 
 void	PacketParser::subValues(const int key, const std::string &value, const __ItemValueType value_type)
@@ -249,9 +225,7 @@ void	PacketParser::subValues(const int key, const std::string &value, const __It
 		data[key]["value"] = result;
 	}
 	else if (value_type == IVT_STRING)
-	{
-		throw UnsupportedOperationException("Subtraction of strings is unsupported!");
-	}
+		throw UnsupportedOperationException("Subtraction of strings is unsupported!", key, value_type);
 	else
-		throw UnsupportedOperationException("Unsupported operation on unknown type.");
+		throw UnsupportedOperationException("Unsupported substraction on unknown type.", key, value_type);
 }
