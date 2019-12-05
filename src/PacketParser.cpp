@@ -135,7 +135,7 @@ void	PacketParser::beginProcessing(std::istream &is)
 						break;
 					}
 					else
-						throw UnsupportedOperationException("Using of unexpected key value: " + static_cast<char>(ch));
+						throw UnsupportedOperationException("Using of unexpected key value");
 				}
 				if (opt == OperatioType::Null && key != -1)
 				{
